@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Production environment sensitive config
+application-prod.yml
+.env
