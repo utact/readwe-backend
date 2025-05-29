@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
+import java.util.Optional;
 
 @Repository
 public class RedisRefreshTokenRepository implements RefreshTokenRepository {
@@ -20,6 +21,12 @@ public class RedisRefreshTokenRepository implements RefreshTokenRepository {
     @Override
     public void save(String userId, String refreshToken) {
         redisTemplate.opsForValue().set(getKey(userId), refreshToken, tokenExpireTime);
+    }
+
+    @Override
+    public Optional<String> findByUserId(String userId) {
+        String token = redisTemplate.opsForValue().get(getKey(userId));
+        return Optional.ofNullable(token);
     }
 
     private String getKey(String userId) {

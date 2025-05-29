@@ -32,6 +32,10 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public Optional<User> findById(String userId) {
+        return userRepository.findById(userId);
+    }
+
     public boolean matchesPassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
