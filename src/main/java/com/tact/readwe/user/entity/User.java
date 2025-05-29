@@ -44,4 +44,16 @@ public class User {
         this.userId = UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
     }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }
