@@ -5,6 +5,7 @@ import com.tact.readwe.auth.dto.RefreshRequest;
 import com.tact.readwe.auth.service.AuthService;
 import com.tact.readwe.user.dto.UserLoginRequest;
 import com.tact.readwe.user.dto.UserLoginResponse;
+import com.tact.readwe.user.dto.UserLogoutRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,5 +33,11 @@ public class AuthController {
         String newAccessToken = authService.refreshAccessToken(request.userId(), request.refreshToken());
         AccessResponse response = new AccessResponse(newAccessToken);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody UserLogoutRequest request) {
+        authService.logout(request.userId());
+        return ResponseEntity.noContent().build();
     }
 }

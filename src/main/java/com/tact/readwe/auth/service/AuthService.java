@@ -59,6 +59,11 @@ public class AuthService {
         return tokenProvider.generateAccessToken(user.getUserId(), user.getEmail());
     }
 
+    @Transactional
+    public void logout(String userId) {
+        refreshTokenRepository.delete(userId);
+    }
+
     public record Tokens(String accessToken, String refreshToken) {
     }
 }
