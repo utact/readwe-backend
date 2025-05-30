@@ -1,16 +1,10 @@
 package com.tact.readwe.auth.controller;
 
-import com.tact.readwe.auth.dto.AccessResponse;
-import com.tact.readwe.auth.dto.RefreshRequest;
+import com.tact.readwe.auth.dto.*;
 import com.tact.readwe.auth.service.AuthService;
-import com.tact.readwe.user.dto.UserLoginRequest;
-import com.tact.readwe.user.dto.UserLoginResponse;
-import com.tact.readwe.user.dto.UserLogoutRequest;
+import com.tact.readwe.user.dto.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,6 +29,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    // TODO: 액세스 토큰 블랙리스트 처리 + 파라미터 변경 (@AuthenticationPrincipal 활용)
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestBody UserLogoutRequest request) {
         authService.logout(request.userId());
