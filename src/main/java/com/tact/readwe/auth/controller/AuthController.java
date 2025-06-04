@@ -2,6 +2,7 @@ package com.tact.readwe.auth.controller;
 
 import com.tact.readwe.auth.dto.*;
 import com.tact.readwe.auth.service.AuthService;
+import com.tact.readwe.common.dto.ApiResponse;
 import com.tact.readwe.user.dto.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,17 +17,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponse> login(@RequestBody UserLoginRequest request) {
+    public ResponseEntity<ApiResponse<UserLoginResponse>> login(@RequestBody UserLoginRequest request) {
         AuthService.Tokens tokens = authService.login(request.email(), request.password());
         UserLoginResponse response = new UserLoginResponse(tokens.accessToken(), tokens.refreshToken());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AccessResponse> refreshToken(@RequestBody RefreshRequest request) {
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> refreshToken(@RequestBody RefreshRequest request) {
         String newAccessToken = authService.refreshAccessToken(request.userId(), request.refreshToken());
-        AccessResponse response = new AccessResponse(newAccessToken);
-        return ResponseEntity.ok(response);
+        AccessTokenResponse response = new AccessTokenResponse(newAccessToken);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // TODO: 액세스 토큰 블랙리스트 처리 + 파라미터 변경 (@AuthenticationPrincipal 활용)
