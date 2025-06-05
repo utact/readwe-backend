@@ -3,14 +3,14 @@ package com.tact.readwe.global.exception;
 import org.springframework.http.HttpStatus;
 
 public class BusinessException extends RuntimeException {
-    private final HttpStatus status;
+    private final ErrorCode errorCode;
 
-    protected BusinessException(HttpStatus status, String message) {
-        super(message);
-        this.status = status;
+    protected BusinessException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
     }
 
     public HttpStatus getStatus() {
-        return status;
+        return errorCode.getStatus();
     }
 }
