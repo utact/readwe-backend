@@ -7,8 +7,8 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 
 public record ErrorResponse(
-        String errorCode,
         int statusCode,
+        String errorCode,
         String message,
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -16,16 +16,16 @@ public record ErrorResponse(
 ) {
     public static ErrorResponse of(HttpStatus status, String message) {
         return new ErrorResponse(
-                status.getReasonPhrase(),
                 status.value(),
+                status.getReasonPhrase(),
                 message,
                 LocalDateTime.now());
     }
 
     public static ErrorResponse of(ErrorCode errorCode) {
         return new ErrorResponse(
-                errorCode.name(),
                 errorCode.getStatus().value(),
+                errorCode.name(),
                 errorCode.getMessage(),
                 LocalDateTime.now()
         );

@@ -2,6 +2,8 @@ package com.tact.readwe.auth.service;
 
 import com.tact.readwe.auth.token.TokenProvider;
 import com.tact.readwe.auth.token.TokenValidator;
+import com.tact.readwe.global.exception.BusinessException;
+import com.tact.readwe.global.exception.ErrorCode;
 import com.tact.readwe.user.entity.User;
 import com.tact.readwe.user.service.UserService;
 import com.tact.readwe.auth.repository.RefreshTokenRepository;
@@ -28,10 +30,10 @@ public class AuthService {
     @Transactional
     public Tokens login(String email, String rawPassword) {
         User user = userService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Invalid email"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_LOGIN_CREDENTIALS));
 
         if (!userService.matchesPassword(rawPassword, user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            throw new BusinessException(ErrorCode.INVALID_LOGIN_CREDENTIALS);
         }
 
         String accessToken = tokenProvider.generateAccessToken(user.getUserId(), user.getEmail());
@@ -44,18 +46,20 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public String refreshAccessToken(String userId, String refreshToken) {
-        refreshTokenRepository.findByUserId(userId)
-                .filter(token -> token.equals(refreshToken))
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
         if (!tokenValidator.isValid(refreshToken)) {
-            throw new RuntimeException("Malformed refresh token");
-        }
-        if (tokenValidator.isExpired(refreshToken)) {
-            throw new RuntimeException("Expired refresh token");
+            throw new BusinessException(ErrorCode.MALFORMED_REFRESH_TOKEN);
         }
 
+        if (tokenValidator.isExpired(refreshToken)) {
+            throw new BusinessException(ErrorCode.EXPIRED_REFRESH_TOKEN);
+        }
+
+        refreshTokenRepository.findByUserId(userId)
+                .filter(token -> token.equals(refreshToken))
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
+
         User user = userService.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         return tokenProvider.generateAccessToken(user.getUserId(), user.getEmail());
     }
 

@@ -23,7 +23,7 @@ public class TokenValidator {
             parse(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            log.warn("Invalid JWT token", e);
+            log.warn("유효하지 않은 JWT 토큰입니다.", e);
             return false;
         }
     }
@@ -33,6 +33,7 @@ public class TokenValidator {
             Date expiration = parse(token).getExpiration();
             return expiration.before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
+            log.warn("만료된 JWT 토큰입니다.", e);
             return true;
         }
     }
