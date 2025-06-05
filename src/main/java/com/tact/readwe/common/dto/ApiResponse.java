@@ -11,8 +11,4 @@ public record ApiResponse<T>(
     public static <T> ApiResponse<T> success(HttpStatus status, T data) {
         return new ApiResponse<>(true, status.value(), status.getReasonPhrase(), data);
     }
-
-    public static <T> ApiResponse<T> failure(HttpStatus status, String message) {
-        return new ApiResponse<>(false, status.value(), message, null);
-    }
 }

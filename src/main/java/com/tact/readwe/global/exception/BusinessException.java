@@ -10,6 +10,10 @@ public class BusinessException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
+    public ErrorCode getErrorCode() {
+        return errorCode;
+    }
+
     public HttpStatus getStatus() {
         return errorCode.getStatus();
     }
