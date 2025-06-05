@@ -3,6 +3,7 @@ package com.tact.readwe.user.controller;
 import com.tact.readwe.user.dto.UserSignUpRequest;
 import com.tact.readwe.user.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,6 @@ public class UserController {
     @PostMapping
     public ResponseEntity<Void> signUp(@Valid @RequestBody UserSignUpRequest request) {
         userService.signUp(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
