@@ -1,30 +1,34 @@
 package com.tact.readwe.user.entity;
 
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table
+@EntityListeners(AuditingEntityListener.class)
 public class User {
     @Id
-    @Column(name = "user_id", length = 36, nullable = false)
+    @Column(length = 36, nullable = false)
     private String userId;
 
-    @Column(name = "name", length = 50)
+    @Column(length = 50, nullable = false)
     private String name;
 
-    @Column(name = "email", length = 100)
+    @Column(length = 100, nullable = false)
     private String email;
 
-    @Column(name = "password", length = 100)
+    @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(name = "color_code", length = 7)
+    @Column(length = 7, nullable = false)
     private String colorCode;
 
-    @Column(name = "created_at")
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
     public User() {}
@@ -42,7 +46,6 @@ public class User {
     @PrePersist
     protected void onCreate() {
         this.userId = UUID.randomUUID().toString();
-        this.createdAt = LocalDateTime.now();
     }
 
     public String getUserId() {
