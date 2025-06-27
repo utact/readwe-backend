@@ -12,8 +12,12 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
+    private long id;
+
     @Column(length = 36, nullable = false)
-    private String userId;
+    private UUID userId;
 
     @Column(length = 50, nullable = false)
     private String name;
@@ -45,10 +49,12 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
-        this.userId = UUID.randomUUID().toString();
+        this.userId = UUID.randomUUID();
     }
 
-    public String getUserId() {
+    public long getId() { return id; }
+
+    public UUID getUserId() {
         return userId;
     }
 
