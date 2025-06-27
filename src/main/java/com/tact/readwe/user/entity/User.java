@@ -24,7 +24,7 @@ public class User {
     @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(length = 7, nullable = false)
+    @Column(length = 7)
     private String colorCode;
 
     @CreatedDate
