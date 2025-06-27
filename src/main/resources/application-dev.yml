@@ -15,3 +15,10 @@ spring:
 
 server:
   port: 8080
+
+jwt:
+  secret: 1234567890-dev-secret-key-1234567890
+  access-token-expiration: 3600000
+  refresh-token-expiration: 1209600000
+  header: Authorization
+  prefix: Bearer
