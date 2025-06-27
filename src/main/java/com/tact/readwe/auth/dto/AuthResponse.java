@@ -1,7 +1,9 @@
 package com.tact.readwe.auth.dto;
 
+import java.util.UUID;
+
 public record AuthResponse(
-        Long userId,
+        UUID userId,
         String accessToken,
         String refreshToken
 ) {
