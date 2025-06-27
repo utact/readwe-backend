@@ -48,50 +48,37 @@ public class AuthService {
 
     @Transactional
     public Tokens refreshTokens(String refreshToken) {
-        if (tokenProvider.isTokenExpired(refreshToken)) {
-            throw new BusinessException(ErrorCode.EXPIRED_REFRESH_TOKEN);
-        }
+        validateRefreshToken(refreshToken);
 
-        if (!tokenProvider.validateToken(refreshToken)) {
-            throw new BusinessException(ErrorCode.MALFORMED_REFRESH_TOKEN);
-        }
+        UUID userId = tokenProvider.getUserIdFromToken(refreshToken);
+        String jti = tokenProvider.getJtiFromToken(refreshToken);
+        String userIdStr = userId.toString();
 
-        UUID userIdFromToken = tokenProvider.getUserIdFromToken(refreshToken);
-        String jtiFromToken = tokenProvider.getJtiFromToken(refreshToken);
-
-        User user = userService.findById(String.valueOf(userIdFromToken))
+        User user = userService.findById(userIdStr)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        String storedRefreshToken = refreshTokenRepository.findByUserId(userIdFromToken.toString())
+        String storedRefreshToken = refreshTokenRepository.findByUserId(userIdStr)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
 
         if (!storedRefreshToken.equals(refreshToken)) {
-            refreshTokenRepository.delete(userIdFromToken.toString());
-            usedRefreshTokenRepository.save(jtiFromToken, tokenProvider.getExpirationDateFromToken(refreshToken));
-
-            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+            handleInvalidRefreshToken(userIdStr, jti, refreshToken);
         }
 
-        if (usedRefreshTokenRepository.isUsed(jtiFromToken)) {
-            refreshTokenRepository.delete(userIdFromToken.toString());
-
+        if (usedRefreshTokenRepository.isUsed(jti)) {
+            refreshTokenRepository.delete(userIdStr);
             throw new BusinessException(ErrorCode.REUSED_REFRESH_TOKEN);
         }
 
-        refreshTokenRepository.delete(user.getUserId().toString());
-        usedRefreshTokenRepository.save(jtiFromToken, tokenProvider.getExpirationDateFromToken(refreshToken));
+        refreshTokenRepository.delete(userIdStr);
+        usedRefreshTokenRepository.save(jti, tokenProvider.getExpirationDateFromToken(refreshToken));
 
-        String newAccessToken = tokenProvider.generateAccessToken(user.getUserId(), user.getEmail());
-        String newRefreshToken = tokenProvider.generateRefreshToken(user.getUserId(), user.getEmail());
-
-        refreshTokenRepository.save(user.getUserId().toString(), newRefreshToken);
-
-        return new Tokens(user.getUserId(), user.getEmail(), newAccessToken, newRefreshToken);
+        return issueNewTokens(user);
     }
 
     @Transactional
     public void logout(UUID userIdToLogout, String accessTokenToBlacklist) {
-        refreshTokenRepository.delete(userIdToLogout.toString());
+        String userIdStr = userIdToLogout.toString();
+        refreshTokenRepository.delete(userIdStr);
 
         Date expirationDate = tokenProvider.getExpirationDateFromToken(accessTokenToBlacklist);
         long expiresInMs = expirationDate.getTime() - System.currentTimeMillis();
@@ -107,8 +94,35 @@ public class AuthService {
     }
 
     private Tokens generateAndStoreTokens(User user) {
-        refreshTokenRepository.delete(user.getUserId().toString());
+        String userIdStr = user.getUserId().toString();
+        refreshTokenRepository.delete(userIdStr);
 
+        String accessToken = tokenProvider.generateAccessToken(user.getUserId(), user.getEmail());
+        String refreshToken = tokenProvider.generateRefreshToken(user.getUserId(), user.getEmail());
+
+        refreshTokenRepository.save(userIdStr, refreshToken);
+
+        return new Tokens(user.getUserId(), user.getEmail(), accessToken, refreshToken);
+    }
+
+    private void validateRefreshToken(String refreshToken) {
+        if (tokenProvider.isTokenExpired(refreshToken)) {
+            throw new BusinessException(ErrorCode.EXPIRED_REFRESH_TOKEN);
+        }
+
+        if (!tokenProvider.validateToken(refreshToken)) {
+            throw new BusinessException(ErrorCode.MALFORMED_REFRESH_TOKEN);
+        }
+    }
+
+    private void handleInvalidRefreshToken(String userIdStr, String jti, String refreshToken) {
+        refreshTokenRepository.delete(userIdStr);
+        usedRefreshTokenRepository.save(jti, tokenProvider.getExpirationDateFromToken(refreshToken));
+
+        throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+    }
+
+    private Tokens issueNewTokens(User user) {
         String accessToken = tokenProvider.generateAccessToken(user.getUserId(), user.getEmail());
         String refreshToken = tokenProvider.generateRefreshToken(user.getUserId(), user.getEmail());
 
