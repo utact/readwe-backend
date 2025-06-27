@@ -1,5 +1,7 @@
 package com.tact.readwe.user.controller;
 
+import com.tact.readwe.auth.dto.AuthResponse;
+import com.tact.readwe.common.dto.ApiResponse;
 import com.tact.readwe.user.dto.UserSignUpRequest;
 import com.tact.readwe.user.service.UserService;
 import jakarta.validation.Valid;
@@ -17,8 +19,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> signUp(@Valid @RequestBody UserSignUpRequest request) {
-        userService.signUp(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<ApiResponse<AuthResponse>> signUp(@Valid @RequestBody UserSignUpRequest request) {
+        AuthResponse response = userService.signUp(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED, response));
     }
 }

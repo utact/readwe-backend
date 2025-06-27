@@ -1,5 +1,7 @@
 package com.tact.readwe.user.service;
 
+import com.tact.readwe.auth.dto.AuthResponse;
+import com.tact.readwe.auth.service.AuthService;
 import com.tact.readwe.global.exception.BusinessException;
 import com.tact.readwe.global.exception.ErrorCode;
 import com.tact.readwe.user.dto.UserSignUpRequest;
@@ -15,19 +17,25 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthService authService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authService = authService;
     }
 
     @Transactional
-    public void signUp(UserSignUpRequest request) {
+    public AuthResponse signUp(UserSignUpRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
         }
+
         String encodedPassword = passwordEncoder.encode(request.password());
-        userRepository.save(User.signUpOf(request.name(), request.email(), encodedPassword));
+        User user = userRepository.save(User.signUpOf(request.name(), request.email(), encodedPassword));
+        AuthService.Tokens response = authService.login(request.email(), request.password());
+
+        return new AuthResponse(user.getId(), response.accessToken(), response.refreshToken());
     }
 
     public Optional<User> findByEmail(String email) {
