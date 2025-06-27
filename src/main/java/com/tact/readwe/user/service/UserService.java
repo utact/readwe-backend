@@ -35,7 +35,7 @@ public class UserService {
         User user = userRepository.save(User.signUpOf(request.name(), request.email(), encodedPassword));
         AuthService.Tokens response = authService.login(request.email(), request.password());
 
-        return new AuthResponse(user.getId(), response.accessToken(), response.refreshToken());
+        return new AuthResponse(user.getUserId(), response.accessToken(), response.refreshToken());
     }
 
     public Optional<User> findByEmail(String email) {
